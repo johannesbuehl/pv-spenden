@@ -1,0 +1,161 @@
+<script lang="ts">
+	export function prepare_svg(r: string, reserved_modules: ReservedModules): string {
+		const parser = new DOMParser();
+		const svg_dom = parser.parseFromString(r, "image/svg+xml").documentElement;
+
+		svg_dom.removeAttribute("width");
+		svg_dom.removeAttribute("height");
+
+		const pv_module_rects: SVGRectElement[] = Array.from(svg_dom.querySelectorAll(".pv-module"));
+
+		pv_module_rects.forEach(pv_module_rect => {
+			pv_module_rect.style.removeProperty("fill");
+
+			if (reserved_modules[pv_module_rect.id] !== undefined) {
+				pv_module_rect.classList.add("sold");
+			}
+		});
+
+		let svg_string = new XMLSerializer().serializeToString(svg_dom);
+
+		return svg_string;
+	}
+</script>
+
+<script setup lang="ts">
+	import { reserved_modules, type ReservedModules } from '@/Globals';
+	import { onBeforeMount, onMounted, onUnmounted, ref } from 'vue';
+import BaseTooltip from './BaseTooltip.vue';
+
+	const svg = ref<string>();
+
+	const svg_path = "modules.svg";
+
+	const tooltip = ref<HTMLDivElement>();
+	const selected_module_rect = ref<SVGRectElement>();
+
+	const selected_module = defineModel<string | undefined>("selected_module", { default: ref<string>() });
+
+	onBeforeMount(async () => {
+		const svg_request = fetch(svg_path);
+
+		if ((await svg_request).ok) {
+			svg.value = await (await svg_request).text()
+		}
+	});
+
+	function on_click(e: MouseEvent) {
+		const target = e.target as SVGElement;
+		
+		if (selected_module_rect.value) {
+			selected_module_rect.value.classList.remove("selected");
+		}
+
+		if (target.classList.contains("pv-module")) {
+
+			// only select the element, if it isn't the previous selected element
+			if (target.id !== selected_module_rect.value?.id) {
+				selected_module_rect.value = target as SVGRectElement;
+				selected_module.value = selected_module_rect.value.id;
+				
+				selected_module_rect.value.classList.add("selected");
+			} else {
+				selected_module_rect.value = undefined;
+				selected_module.value = undefined;
+			}
+		} else {
+			selected_module_rect.value = undefined;
+			selected_module.value = undefined;
+		}
+	}
+
+	onMounted(() => {
+		document.addEventListener("click", on_click);
+	});
+
+	onUnmounted(() => {
+		document.removeEventListener("click", on_click);
+	});
+
+	function on_tooltip_mounted() {
+		if (!!tooltip.value && !!selected_module_rect.value) {
+			const tooltip_width = tooltip.value.getBoundingClientRect().width;
+		
+			const module_position = selected_module_rect.value.getBoundingClientRect();
+
+			const tooltip_left = Math.max(0, module_position.left + module_position.width / 2 - tooltip_width / 2);
+
+			tooltip.value.style.left = `min(${tooltip_left}px, calc(100% - ${tooltip_width}px))`;
+			tooltip.value.style.top = module_position.bottom.toString() + "px";
+		}
+	}
+</script>
+
+<template>
+	<div id="wrapper">
+		<div
+			v-if="!!svg"
+			id="div-svg"
+			v-html="prepare_svg(svg, reserved_modules)"
+		/>
+		<div
+			id="tooltip-wrapper"
+			ref="tooltip"
+		>
+			<Transition>
+				<BaseTooltip
+					v-if="selected_module && selected_module.length > 0"
+					@refresh="on_tooltip_mounted"
+				>
+					<slot></slot>
+				</BaseTooltip>
+			</Transition>
+		</div>
+	</div>
+</template>
+
+<style scoped>
+	#div-svg {		
+		min-width: 500px;
+	}
+
+	#tooltip-wrapper {
+		position: absolute;
+	}
+
+	.v-enter-active,
+	.v-leave-active {
+		transition: filter 0.2s;
+	}
+
+	.v-enter-from,
+	.v-leave-to {
+		filter: opacity(0);
+
+	}
+</style>
+
+<style>
+	svg * {
+		user-select: none;
+	}
+
+	svg .pv-module:hover {
+		fill: hsl(from blue h s 60%);
+	}
+
+	svg .pv-module {
+		cursor: pointer;
+		fill: hsl(240 100% 50%);
+		
+		transition: fill 0.2s;
+	}
+
+	svg .pv-module.selected {
+		fill: hsl(210 100% 50%);
+	}
+
+	svg .pv-module.sold {
+		fill: hsl(240 20% 55%)
+	}
+</style>

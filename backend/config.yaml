@@ -1,0 +1,14 @@
+log_level: DEBUG
+database:
+  host: localhost:3306
+  user: johannes
+  password: U9rAruUB.xyHpKJcLXdW
+  database: johannes_pv
+cache:
+  expiration: 12h
+  purge: 12h
+client_session:
+  jwt_signature: .s4U6uEWe!8BQr4YUTW@HNJsYA8NCMutbhe!H!mgKZB8fEsdsBqayfYNcTgHiYApGd-6_LgyU!WJjD!6d7dhejxruNew-Woz2R*c
+  expire: 168h
+server:
+  port: 61016
