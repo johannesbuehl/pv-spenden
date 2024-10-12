@@ -1,4 +1,4 @@
-module github.com/johannesbuehl/johannes-pv
+module github.com/johannesbuehl/johannes-pv/backend
 
 go 1.23.1
 
