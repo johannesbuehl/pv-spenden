@@ -1,18 +1,10 @@
 <script setup lang="ts">
 	import { ref } from 'vue';
 
-	import BasePV from './components/BasePV.vue';
+	import BasePV, { type Module } from './components/BasePV.vue';
 	import { reserved_modules } from './Globals';
 
-	const selected_module = ref<string>("");
-
-	function get_tooltip_text(id: string): string {
-		if (reserved_modules.value[id]) {
-			return reserved_modules.value[id];
-		} else {
-			return "Anonym";
-		}
-	}
+	const selected_module = ref<Module>();
 </script>
 
 <template>
@@ -20,11 +12,11 @@
 		v-model:selected_module="selected_module"
 	>
 		<div
-			v-if="reserved_modules[selected_module] !== undefined"
+			v-if="selected_module && reserved_modules[selected_module.mid] !== undefined"
 			id="tooltip-sold"
 		>
 			Gespendet von<br>
-			{{ get_tooltip_text(selected_module) }}
+			{{ selected_module.name }}
 		</div>
 		<div
 			v-else

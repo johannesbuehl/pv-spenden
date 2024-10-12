@@ -1,4 +1,6 @@
 <script lang="ts">
+	export interface Module { mid: string; name?: string; }
+
 	export function prepare_svg(r: string, reserved_modules: ReservedModules): string {
 		const parser = new DOMParser();
 		const svg_dom = parser.parseFromString(r, "image/svg+xml").documentElement;
@@ -34,7 +36,7 @@ import BaseTooltip from './BaseTooltip.vue';
 	const tooltip = ref<HTMLDivElement>();
 	const selected_module_rect = ref<SVGRectElement>();
 
-	const selected_module = defineModel<string | undefined>("selected_module", { default: ref<string>() });
+	const selected_module = defineModel<Module | undefined>("selected_module");
 
 	onBeforeMount(async () => {
 		const svg_request = fetch(svg_path);
@@ -52,11 +54,17 @@ import BaseTooltip from './BaseTooltip.vue';
 		}
 
 		if (target.classList.contains("pv-module")) {
-
 			// only select the element, if it isn't the previous selected element
 			if (target.id !== selected_module_rect.value?.id) {
 				selected_module_rect.value = target as SVGRectElement;
-				selected_module.value = selected_module_rect.value.id;
+				const mid = selected_module_rect.value?.id;
+
+				let reserved_module_text = reserved_modules.value[mid];
+
+				selected_module.value = {
+					mid,
+					name: reserved_module_text !== "" ? reserved_module_text : "Anonym"
+				};
 				
 				selected_module_rect.value.classList.add("selected");
 			} else {
@@ -97,14 +105,14 @@ import BaseTooltip from './BaseTooltip.vue';
 			v-if="!!svg"
 			id="div-svg"
 			v-html="prepare_svg(svg, reserved_modules)"
-		/>
+		></div>
 		<div
 			id="tooltip-wrapper"
 			ref="tooltip"
 		>
 			<Transition>
 				<BaseTooltip
-					v-if="selected_module && selected_module.length > 0"
+					v-if="selected_module"
 					@refresh="on_tooltip_mounted"
 				>
 					<slot></slot>
