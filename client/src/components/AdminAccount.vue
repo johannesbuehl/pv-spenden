@@ -29,9 +29,9 @@
 	import { ref } from 'vue';
 import { api_call } from '@/lib';
 
-	const password_current = ref<string>("0123456789ab");
-	const password_new = ref<string>("asdfghjklöä#");
-	const password_repeat = ref<string>("asdfghjklöä#");
+	const password_current = ref<string>("");
+	const password_new = ref<string>("");
+	const password_repeat = ref<string>("");
 
 	async function change_password() {
 		if (validate_password(password_new.value, password_repeat.value, password_current.value).length === 0) {

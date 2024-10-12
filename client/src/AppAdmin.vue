@@ -51,7 +51,7 @@
 			// if the module is already reserved, patch it instead
 			const method = reserved_modules.value[selected_module.value.mid] === undefined ? "POST" : "PATCH";
 				
-			response = await api_call<{ reserved_modules: ReservedModules }>(method, "modules", { mid: selected_module.value }, {
+			response = await api_call<{ reserved_modules: ReservedModules }>(method, "modules", { mid: selected_module.value.mid }, {
 				name
 			});
 			
