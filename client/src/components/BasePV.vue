@@ -33,6 +33,7 @@ import BaseTooltip from './BaseTooltip.vue';
 
 	const svg_path = "modules.svg";
 
+	const svg_wrapper = ref<HTMLDivElement>();
 	const tooltip = ref<HTMLDivElement>();
 	const selected_module_rect = ref<SVGRectElement>();
 
@@ -86,15 +87,16 @@ import BaseTooltip from './BaseTooltip.vue';
 	});
 
 	function on_tooltip_mounted() {
-		if (!!tooltip.value && !!selected_module_rect.value) {
+		if (!!svg_wrapper.value && !!tooltip.value && !!selected_module_rect.value) {
 			const tooltip_width = tooltip.value.getBoundingClientRect().width;
 		
 			const module_position = selected_module_rect.value.getBoundingClientRect();
+			const svg_wrapper_position = svg_wrapper.value.getBoundingClientRect();
 
-			const tooltip_left = Math.max(0, module_position.left + module_position.width / 2 - tooltip_width / 2);
+			const tooltip_left = Math.max(svg_wrapper_position.left, module_position.left + window.scrollX + module_position.width / 2 - tooltip_width / 2);
 
-			tooltip.value.style.left = `min(${tooltip_left}px, calc(100% - ${tooltip_width}px))`;
-			tooltip.value.style.top = module_position.bottom.toString() + "px";
+			tooltip.value.style.left = `min(${tooltip_left}px, ${svg_wrapper_position.width + svg_wrapper_position.left + scrollX - tooltip_width}px)`;
+			tooltip.value.style.top = (module_position.bottom + window.scrollY).toString() + "px";
 		}
 	}
 </script>
@@ -104,6 +106,7 @@ import BaseTooltip from './BaseTooltip.vue';
 		<div
 			v-if="!!svg"
 			id="div-svg"
+			ref="svg_wrapper"
 			v-html="prepare_svg(svg, reserved_modules)"
 		></div>
 		<div
@@ -123,12 +126,20 @@ import BaseTooltip from './BaseTooltip.vue';
 </template>
 
 <style scoped>
+	#wrapper {
+		align-items: center;
+
+		overflow: auto;
+	}
+
 	#div-svg {		
-		min-width: 500px;
+		min-width: 50em;
 	}
 
 	#tooltip-wrapper {
 		position: absolute;
+
+		width: max-content;
 	}
 
 	.v-enter-active,
