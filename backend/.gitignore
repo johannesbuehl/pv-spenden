@@ -1,3 +1,5 @@
-__debug*.exe
+__debug*
+backend.exe
+backend
 
 logs

@@ -91,7 +91,7 @@ func main() {
 		}
 	}
 
-	fmt.Printf(`created user "admin" with password %s`, password)
+	fmt.Printf(`created user "admin" with password %s\n`, password)
 
 	// create a jwt-signature
 	config.ClientSession.JwtSignature = createPassword(100)

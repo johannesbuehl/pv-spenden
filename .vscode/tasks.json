@@ -8,6 +8,15 @@
 			"problemMatcher": [],
 			"label": "npm: dev - client",
 			"detail": "vite"
+		},
+		{
+			"label": "build backend",
+			"type": "shell",
+			"command": "go build -ldflags '-s -w'",
+			"problemMatcher": [],
+			"options": {
+				"cwd": "backend"
+			}
 		}
 	]
 }
