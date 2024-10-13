@@ -3,9 +3,10 @@
 	import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 	import { faRightToBracket } from "@fortawesome/free-solid-svg-icons";
 
-	import BaseButton from "./BaseButton.vue";
 	import { api_call, HTTPStatus } from "@/lib";
-	import type { UserLogin } from "@/AppAdmin.vue";
+	import type { UserLogin } from "@/Globals";
+	
+	import BaseButton from "./BaseButton.vue";
 
 	const user_input = ref<string>("");
 	const password_input = ref<string>("");

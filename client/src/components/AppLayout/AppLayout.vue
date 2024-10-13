@@ -8,14 +8,14 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 	const footer_sites = {
 		/* eslint-disable @typescript-eslint/naming-convention */
-		About: "/About",
-		Datenschutz: "/legal/Datenschutz",
-		Impressum: "/legal/Impressum"
+		About: "/about",
+		Datenschutz: "/legal/datenschutz",
+		Impressum: "/legal/impressum"
 		/* eslint-enable @typescript-eslint/naming-convention */
 	};
 
 	function is_home(pathname: string): boolean {
-		console.debug(window.location.pathname)
+		console.debug(window.location.pathname, pathname);
 
 		return window.location.pathname === pathname;
 	}
@@ -72,6 +72,12 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 		margin-top: auto;
 
 		font-size: 0.75em;
+	}
+
+	.active {
+		font-weight: bold;
+
+		text-decoration: underline;
 	}
 </style>
 

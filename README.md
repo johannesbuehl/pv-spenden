@@ -8,11 +8,9 @@
 
 ## setup
 - add logging
-- create jwt-key
 
 ## frontend
 - mnove styling to central variables
-- limit min and max of svg
 
 # password-rules
 - min-length: 12

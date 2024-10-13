@@ -26,6 +26,9 @@ export default defineConfig({
 		  input: {
 			  "pv-spenden": resolve(__dirname, "src/index.html"),
 			  admin: resolve(__dirname, "src/admin.html"),
+			  about: resolve(__dirname, "src/about.html"),
+			  "legal/datenschutz": resolve(__dirname, "src/legal/datenschutz.html"),
+			  "legal/impressum": resolve(__dirname, "src/legal/impressum.html"),
 		  }
 	  }
   },
