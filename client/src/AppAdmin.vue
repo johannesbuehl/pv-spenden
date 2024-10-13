@@ -1,8 +1,4 @@
 <script lang="ts">
-	export interface UserLogin extends User {
-		logged_in: boolean;
-	}
-
 	enum WindowState {
 		Login,
 		Modules,
@@ -14,28 +10,19 @@
 <script setup lang="ts">
 	import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 	import { faPlus, faSdCard, faTrashCan, faXmark } from '@fortawesome/free-solid-svg-icons';
-	import { onMounted, ref, watch } from 'vue';
+	import { ref, watch } from 'vue';
 	
 	import BasePV, { type Module } from './components/BasePV.vue';
 	import { api_call, type APICallResult } from './lib';
-	import { reserved_modules, type ReservedModules } from './Globals';
-	import AdminUsers, { type User } from './components/AdminUsers.vue';
+	import { reserved_modules, user, type ReservedModules } from './Globals';
+	import AdminUsers from './components/AdminUsers.vue';
 	import BaseButton from './components/BaseButton.vue';
 	import AdminLogin from './components/AdminLogin.vue';
-	import AdminNavbar from './components/AdminNavbar.vue';
 	import AdminAccount from './components/AdminAccount.vue';
+	import AppLayout from './components/AppLayout/AppLayout.vue';
 
 	const window_state = ref<WindowState>(WindowState.Login);
-	const user = ref<UserLogin>();
 	const selected_module = ref<Module>();
-
-	onMounted(async () => {
-		const response = await api_call<UserLogin>("GET", "welcome");
-
-		if (response.ok) {
-			user.value = await response.json();
-		}
-	});
 
 	watch(user, user => {
 			window_state.value = user?.logged_in ? WindowState.Modules : WindowState.Login
@@ -83,12 +70,12 @@
 
 <template>
 	<AdminLogin v-if="window_state === WindowState.Login" v-model="user" />
-	<div id="main-view" v-else>
-		<AdminNavbar v-model="user">
-			<BaseButton class="navbar-item" :class="{ active: window_state === WindowState.Modules }" @click="window_state = WindowState.Modules">Modules</BaseButton>
-			<BaseButton class="navbar-item" :class="{ active: window_state === WindowState.Account }" @click="window_state = WindowState.Account">Account</BaseButton>
-			<BaseButton v-if="user?.name === 'admin'" class="navbar-item" :class="{ active: window_state === WindowState.Users }" @click="window_state = WindowState.Users">Users</BaseButton>
-		</AdminNavbar>
+	<AppLayout v-else>
+		<template #header>
+			<a class="navbar-item" :class="{ active: window_state === WindowState.Modules }" @click="window_state = WindowState.Modules">Modules</a>
+			<a class="navbar-item" :class="{ active: window_state === WindowState.Account }" @click="window_state = WindowState.Account">Account</a>
+			<a v-if="user?.name === 'admin'" class="navbar-item" :class="{ active: window_state === WindowState.Users }" @click="window_state = WindowState.Users">Users</a>
+		</template>
 		<BasePV
 			v-if="window_state === WindowState.Modules"
 			v-model:selected_module="selected_module"
@@ -125,7 +112,7 @@
 		</BasePV>
 		<AdminAccount v-else-if="window_state === WindowState.Account" />
 		<AdminUsers v-else-if="window_state === WindowState.Users" />
-	</div>
+	</AppLayout>
 </template>
 
 <style scoped>

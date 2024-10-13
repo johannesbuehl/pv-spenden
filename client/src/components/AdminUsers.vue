@@ -1,9 +1,4 @@
 <script lang="ts">
-	export interface User {
-		uid: number;
-		name: string;
-	}
-
 	export function validate_password(password: string): boolean {
 		const password_length = password?.length;
 
@@ -18,6 +13,7 @@
 
 	import BaseButton from './BaseButton.vue';
 	import { api_call } from '@/lib';
+	import type { User } from '@/Globals';
 
 	interface PasswordUser extends User {
 		password: string

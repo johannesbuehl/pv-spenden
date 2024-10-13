@@ -12,3 +12,22 @@ void (async () => {
 		reserved_modules.value = (await (await reserved_modules_request).json()).reserved_modules
 	}
 })();
+
+export interface User {
+	uid: number;
+	name: string;
+}
+
+export interface UserLogin extends User {
+	logged_in: boolean;
+}
+
+export const user = ref<UserLogin>();
+
+void (async () => {
+	const response = await api_call<UserLogin>("GET", "welcome");
+
+	if (response.ok) {
+		user.value = await response.json();
+	}
+})()
