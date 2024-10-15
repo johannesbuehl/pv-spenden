@@ -25,8 +25,7 @@ import AppLayout from './components/AppLayout/AppLayout.vue';
 					v-if="reserved_elements[selected_element.mid] !== undefined"
 					id="tooltip-sold"
 				>
-					Gespendet von<br>
-					{{ selected_element.name }}
+					Gespendet von {{ selected_element.name }}
 				</div>
 				<div
 					v-else
