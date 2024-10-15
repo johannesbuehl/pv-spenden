@@ -272,7 +272,7 @@ func checkUser(c *fiber.Ctx) (bool, error) {
 	uid, tid, err := extractJWT(c)
 
 	if err != nil {
-		return false, err
+		return false, nil
 	}
 
 	response, err := dbSelect[UserDB]("users", "uid = ? LIMIT 1", uid)
@@ -694,7 +694,9 @@ func handleWelcome(c *fiber.Ctx) error {
 	} else if !ok {
 		response.Status = fiber.StatusUnauthorized
 	} else {
-		if uid, _, err := extractJWT(c); err == nil {
+		if uid, _, err := extractJWT(c); err != nil {
+			response.Status = fiber.StatusBadRequest
+		} else {
 			if users, err := dbSelect[UserDB]("users", "uid = ? LIMIT 1", strconv.Itoa(uid)); err != nil {
 				response.Status = fiber.StatusInternalServerError
 			} else {
@@ -907,5 +909,5 @@ func main() {
 		}
 	}
 
-	app.Listen(fmt.Sprintf("localhost:%d", config.Server.Port))
+	app.Listen(fmt.Sprintf(":%d", config.Server.Port))
 }
