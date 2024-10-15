@@ -87,6 +87,7 @@
 
 <template>
 	<div id="admin-wrapper">
+		<h1>Benutzer</h1>
 		<div id="add-user-wrapper">
 			<div id="add-user-wrapper-inputs">
 				Benutzername: <input type="text" v-model="add_user_name_input" placeholder="username" />
