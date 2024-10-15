@@ -8,7 +8,7 @@ cache:
   expiration: 12h
   purge: 12h
 client_session:
-  jwt_signature: $oD0ö('i14|8]!D*n<ÖvA7:8Q#JXk$EH|!"DmwEz)[1YUwL§6A9QkeC)+:nz9RCygzVC#tKS8<d[_,k°L|ße(ä@BOHA%K2RT°X7N
+  jwt_signature: EaX/K6%säQcüFHu+s-{<e(*L4+N8@Ü1g=2NPPüv|"{K.§kv70ZRbzq%KBdN8aW;ü05S(HmH§)rÖc&-(Rö3P6{>'Y<8wEüq2WVDv3
   expire: 168h
 server:
   port: 61016

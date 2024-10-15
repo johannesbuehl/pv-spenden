@@ -49,10 +49,4 @@ import { faXmark } from '@fortawesome/free-solid-svg-icons';
 	#btn-close {
 		margin-left: auto;
 	}
-
-	#text {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-	}
 </style>

@@ -89,8 +89,8 @@
 	<div id="admin-wrapper">
 		<div id="add-user-wrapper">
 			<div id="add-user-wrapper-inputs">
-				username: <input type="text" v-model="add_user_name_input" placeholder="username" />
-				password: <input type="text" v-model="add_user_password_input" placeholder="password" />
+				Benutzername: <input type="text" v-model="add_user_name_input" placeholder="username" />
+				Passwort: <input type="text" v-model="add_user_password_input" placeholder="password" />
 			</div>
 			<BaseButton :disabled="!validate_new_user()" @click="add_user">
 				<FontAwesomeIcon :icon="faPlus" />
@@ -102,9 +102,9 @@
 					<tr class="header">
 						<th>UID</th>
 						<th>Name</th>
-						<th>password</th>
-						<th>Submit</th>
-						<th>Delete</th>
+						<th>Passwort</th>
+						<th>Bestätigen</th>
+						<th>Löschen</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -113,7 +113,7 @@
 						<th>{{ user.name }}</th>
 						<th>
 							<div class="cell">
-								<input type="text" v-model="user.password" placeholder="new password" />
+								<input type="text" v-model="user.password" placeholder="Neues Passwort" />
 							</div>
 						</th>
 						<th>

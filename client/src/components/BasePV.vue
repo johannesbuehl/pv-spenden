@@ -1,47 +1,51 @@
 <script lang="ts">
-	export interface Module { mid: string; name?: string; }
+	export interface Element { mid: string; name?: string; }
 
-	export function prepare_svg(r: string, reserved_modules: ReservedModules): string {
-		const parser = new DOMParser();
-		const svg_dom = parser.parseFromString(r, "image/svg+xml").documentElement;
+	const element_type_map: Record<string, string> = {
+			pv: "PV-Modul",
+			wr: "Wechselrichter",
+			bs: "Batterie"
+	}
 
-		svg_dom.removeAttribute("width");
-		svg_dom.removeAttribute("height");
+	export function get_element_type(mid: string): string {
+		return element_type_map[mid.slice(0, 2)]
+	}
 
-		// const pv_module_rects: SVGRectElement[] = Array.from(svg_dom.querySelectorAll(".pv-module"));
-		const pv_module_rects: SVGRectElement[] = Array.from(svg_dom.querySelectorAll("path[id^='pv-']"));
+	const row_roof_map = {
+		d: "Kirchendach",
+		r: "Gemeindehaus",
+		v: "Pfarrhaus"
+	}
 
-		pv_module_rects.forEach(pv_module => {
-			pv_module.style.removeProperty("fill");
-			pv_module.classList.add("pv-module")
+	export function get_element_roof(mid: string): string {
+		const mid_row = mid.slice(3, 4);
 
-			if (reserved_modules[pv_module.id] !== undefined) {
-				pv_module.classList.add("sold");
+		for (let [row, roof] of Object.entries(row_roof_map)) {
+			if (mid_row <= row) {
+				return `${get_element_type(mid)} "${mid.slice(3).toUpperCase()}" (${roof})`;
 			}
-		});
+		}
 
-		let svg_string = new XMLSerializer().serializeToString(svg_dom);
-
-		return svg_string;
+		return mid_row;
 	}
 </script>
 
 <script setup lang="ts">
 	import { onBeforeMount, onMounted, onUnmounted, ref } from 'vue';
 	
-	import { reserved_modules, type ReservedModules } from '@/Globals';
+	import { reserved_elements, type ReservedElements } from '@/Globals';
 
 	import BaseTooltip from './BaseTooltip.vue';
 
 	const svg = ref<string>();
 
-	const svg_path = "modules.svg";
+	const svg_path = "elements.svg";
 
 	const svg_wrapper = ref<HTMLDivElement>();
 	const tooltip = ref<HTMLDivElement>();
-	const selected_module_rect = ref<SVGRectElement>();
+	const svg_selected_element = ref<SVGRectElement>();
 
-	const selected_module = defineModel<Module | undefined>("selected_module");
+	const selected_element = defineModel<Element | undefined>("selected_element");
 
 	onBeforeMount(async () => {
 		const svg_request = fetch(svg_path);
@@ -52,35 +56,50 @@
 	});
 
 	function hide_tooltip() {
-		if (selected_module_rect.value) {
-			selected_module_rect.value.classList.remove("selected");
+		if (svg_selected_element.value) {
+			svg_selected_element.value.classList.remove("selected");
 		}
 
-		selected_module_rect.value = undefined;
-		selected_module.value = undefined;
+		svg_selected_element.value = undefined;
+		selected_element.value = undefined;
 	}
 
-	function on_click(e: MouseEvent) {
-		const target = e.target as SVGElement;
+	function prepare_svg(r: string, reserved_elements: ReservedElements): string {
+		const parser = new DOMParser();
+		const svg_dom = parser.parseFromString(r, "image/svg+xml").documentElement;
 
-		hide_tooltip();
+		svg_dom.removeAttribute("width");
+		svg_dom.removeAttribute("height");
 
-		if (target.classList.contains("pv-module")) {
-			// only select the element, if it isn't the previous selected element
-			if (target.id !== selected_module_rect.value?.id) {
-				selected_module_rect.value = target as SVGRectElement;
-				const mid = selected_module_rect.value?.id;
+		const prepare_element = (ele: SVGPathElement, classname: string) => {
+			ele.querySelectorAll<SVGSetElement>(".fill").forEach((e) => e.style.removeProperty("fill"));
 
-				let reserved_module_text = reserved_modules.value[mid];
+			ele.style.removeProperty("fill");
 
-				selected_module.value = {
-					mid,
-					name: reserved_module_text !== "" ? reserved_module_text : "Anonym"
-				};
-				
-				selected_module_rect.value.classList.add("selected");
+			ele.classList.add("element");
+
+			ele.classList.add(classname);
+
+			if (reserved_elements[ele.id] !== undefined) {
+				ele.classList.add("sold");
 			}
 		}
+
+		// select all elements
+		const elements: SVGPathElement[] = Array.from(svg_dom.querySelectorAll<SVGPathElement>("[id^='pv-']"));
+		elements.forEach(element => prepare_element(element, "module"));
+
+		// select all inverters
+		const inverters: SVGPathElement[] = Array.from(svg_dom.querySelectorAll<SVGPathElement>("[id^='wr-']"))
+		inverters.forEach(element => prepare_element(element, "inverter"));
+
+		// select all batteries
+		const batteries: SVGPathElement[] = Array.from(svg_dom.querySelectorAll<SVGPathElement>("[id^='bs-']"))
+		batteries.forEach(element => prepare_element(element, "battery"));
+
+		let svg_string = new XMLSerializer().serializeToString(svg_dom);
+
+		return svg_string;
 	}
 
 	onMounted(() => {
@@ -90,6 +109,24 @@
 	onUnmounted(() => {
 		document.removeEventListener("click", on_click);
 	});
+
+	function on_click(e: MouseEvent) {
+		const target = (e.target as SVGElement).closest(".element");
+
+		if (target) {
+			svg_selected_element.value = target as SVGRectElement;
+			const mid = svg_selected_element.value?.id;
+
+			let reserved_element_text = reserved_elements.value[mid];
+
+			selected_element.value = {
+				mid,
+				name: reserved_element_text !== "" ? reserved_element_text : "Anonym"
+			};
+			
+			svg_selected_element.value.classList.add("selected");
+		}
+	}
 </script>
 
 <template>
@@ -98,13 +135,14 @@
 			v-if="!!svg"
 			id="div-svg"
 			ref="svg_wrapper"
-			v-html="prepare_svg(svg, reserved_modules)"
+			v-html="prepare_svg(svg, reserved_elements)"
 		></div>
 		<Transition>
 			<div
-				v-if="selected_module"
+				v-if="selected_element"
 				id="tooltip-wrapper"
 				ref="tooltip"
+				@click="hide_tooltip"
 			>
 				<BaseTooltip
 					@close="hide_tooltip"
@@ -137,7 +175,7 @@
 
 		inset: 0;
 
-		backdrop-filter: blur(10px);
+		backdrop-filter: blur(0.5em);
 
 		display: flex;
 
@@ -162,22 +200,75 @@
 		user-select: none;
 	}
 
-	svg .pv-module:hover {
-		fill: hsl(from blue h s 60%);
+	svg .element {
+		cursor: pointer;
 	}
 
-	svg .pv-module {
-		cursor: pointer;
+	svg .element .fill,
+	svg .element.fill {
 		fill: hsl(240 100% 50%);
 		
-		transition: fill 0.2s;
+		transition: filter 0.2s;
 	}
 
-	svg .pv-module.selected {
+	svg .element:hover .fill,
+	svg .element:hover.fill {
+		filter: brightness(75%);
+	}
+
+	svg .element.selected .fill,
+	svg .element.selected.fill {
 		fill: hsl(210 100% 50%);
 	}
 
-	svg .pv-module.sold {
+	svg .element.sold .fill,
+	svg .element.sold.fill {
+		fill: hsl(240 20% 55%)
+	}
+
+
+	svg .inverter .fill,
+	svg .inverter.fill {
+		fill: hsl(30 100% 50%);
+		
+		transition: filter 0.2s;
+	}
+
+	svg .inverter:hover .fill,
+	svg .inverter:hover.fill {
+		filter: brightness(75%);
+	}
+
+	svg .inverter.select .fill,
+	svg .inverter.select.fill {
+		fill: hsl(210 100% 50%);
+	}
+
+	svg .inverter.sold .fill,
+	svg .inverter.sold.fill {
+		fill: hsl(240 20% 55%)
+	}
+
+	
+	svg .battery .fill,
+	svg .battery.fill {
+		fill: hsl(120, 50%, 50%);
+		
+		transition: filter 0.2s;
+	}
+
+	svg .battery:hover .fill,
+	svg .battery:hover.fill {
+		filter: brightness(75%);
+	}
+
+	svg .battery.select .fill,
+	svg .battery.select.fill {
+		fill: hsl(210 100% 50%);
+	}
+
+	svg .battery.sold .fill,
+	svg .battery.sold.fill {
 		fill: hsl(240 20% 55%)
 	}
 </style>

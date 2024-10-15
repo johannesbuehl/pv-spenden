@@ -304,57 +304,57 @@ func checkAdmin(c *fiber.Ctx) (bool, error) {
 	}
 }
 
-type ModuleDB struct {
+type ElementDB struct {
 	Mid  string `json:"mid"`
 	Name string `json:"name"`
 }
 
 type ClientStatus struct {
-	ReservedModules map[string]string `json:"reserved_modules"`
+	ReservedElements map[string]string `json:"reserved_elements"`
 }
 
-func cacheModules() error {
-	if res, err := dbSelect[ModuleDB]("modules", "*"); err != nil {
+func cacheElements() error {
+	if res, err := dbSelect[ElementDB]("elements", "*"); err != nil {
 		return err
 	} else {
-		moduleMap := make(map[string]string)
+		elementMap := make(map[string]string)
 
-		for _, module := range res {
-			moduleMap[string(module.Mid[:])] = module.Name
+		for _, element := range res {
+			elementMap[string(element.Mid[:])] = element.Name
 		}
 
-		dbCache.Set("modules", moduleMap, cache.DefaultExpiration)
+		dbCache.Set("elements", elementMap, cache.DefaultExpiration)
 
 		return nil
 	}
 }
 
-func getModules(c *fiber.Ctx) responseMessage {
+func getElements(c *fiber.Ctx) responseMessage {
 	response := responseMessage{}
 
-	modules, found := dbCache.Get("modules")
+	elements, found := dbCache.Get("elements")
 
 	if !found {
-		if err := cacheModules(); err != nil {
+		if err := cacheElements(); err != nil {
 			response.Status = fiber.StatusInternalServerError
 
-			logger.Error().Msgf("can't get modules from database: %v", err)
-		} else if modules, found = dbCache.Get("modules"); !found {
+			logger.Error().Msgf("can't get element from database: %v", err)
+		} else if elements, found = dbCache.Get("elements"); !found {
 			response.Status = fiber.StatusInternalServerError
 
-			logger.Error().Msg("can't get 'modules' from cache")
+			logger.Error().Msg("can't get 'elements' from cache")
 		}
 	}
 
 	response.Data = ClientStatus{
-		ReservedModules: modules.(map[string]string),
+		ReservedElements: elements.(map[string]string),
 	}
 	return response
 }
 
-var midRegex = regexp.MustCompile(`^pv-\w\d{1,2}$`)
+var midRegex = regexp.MustCompile(`^(?:pv-\w|(?:ws|bs)-)\d{1,2}$`)
 
-func postModules(c *fiber.Ctx) responseMessage {
+func postElements(c *fiber.Ctx) responseMessage {
 	response := responseMessage{}
 
 	if user, err := checkUser(c); err != nil {
@@ -372,13 +372,13 @@ func postModules(c *fiber.Ctx) responseMessage {
 			response.Status = fiber.StatusBadRequest
 		} else {
 			// clear the current cache
-			dbCache.Delete("modules")
+			dbCache.Delete("elements")
 
 			// write the data to the database
-			if err := dbInsert("modules", ModuleDB{Mid: mid, Name: body.Name}); err != nil {
+			if err := dbInsert("elements", ElementDB{Mid: mid, Name: body.Name}); err != nil {
 				response.Status = fiber.StatusInternalServerError
 			} else {
-				response = getModules(c)
+				response = getElements(c)
 			}
 		}
 	}
@@ -386,7 +386,7 @@ func postModules(c *fiber.Ctx) responseMessage {
 	return response
 }
 
-func patchModules(c *fiber.Ctx) responseMessage {
+func patchElements(c *fiber.Ctx) responseMessage {
 	response := responseMessage{}
 
 	if user, err := checkUser(c); err != nil {
@@ -404,13 +404,13 @@ func patchModules(c *fiber.Ctx) responseMessage {
 			response.Status = fiber.StatusBadRequest
 		} else {
 			// clear the current cache
-			dbCache.Delete("modules")
+			dbCache.Delete("elements")
 
 			// write the data to the database
-			if err := dbUpdate("modules", struct{ Name string }{Name: body.Name}, struct{ Mid string }{Mid: mid}); err != nil {
+			if err := dbUpdate("elements", struct{ Name string }{Name: body.Name}, struct{ Mid string }{Mid: mid}); err != nil {
 				response.Status = fiber.StatusInternalServerError
 			} else {
-				response = getModules(c)
+				response = getElements(c)
 			}
 		}
 	}
@@ -418,7 +418,7 @@ func patchModules(c *fiber.Ctx) responseMessage {
 	return response
 }
 
-func deleteModules(c *fiber.Ctx) responseMessage {
+func deleteElements(c *fiber.Ctx) responseMessage {
 	response := responseMessage{}
 
 	if user, err := checkUser(c); err != nil {
@@ -429,12 +429,12 @@ func deleteModules(c *fiber.Ctx) responseMessage {
 		if mid := c.Query("mid"); !midRegex.MatchString(mid) {
 			response.Status = fiber.StatusBadRequest
 		} else {
-			dbCache.Delete("modules")
+			dbCache.Delete("elements")
 
-			if err := dbDelete("modules", struct{ Mid string }{Mid: mid}); err != nil {
+			if err := dbDelete("elements", struct{ Mid string }{Mid: mid}); err != nil {
 				response.Status = fiber.StatusInternalServerError
 			} else {
-				response = getModules(c)
+				response = getElements(c)
 			}
 		}
 	}
@@ -874,21 +874,21 @@ func main() {
 
 	endpoints := map[string]map[string]func(*fiber.Ctx) responseMessage{
 		"GET": {
-			"modules": getModules,
-			"users":   getUsers,
+			"elements": getElements,
+			"users":    getUsers,
 		},
 		"POST": {
-			"modules": postModules,
-			"users":   postUsers,
+			"elements": postElements,
+			"users":    postUsers,
 		},
 		"PATCH": {
-			"modules":       patchModules,
+			"elements":      patchElements,
 			"users":         patchUsers,
 			"user/password": patchUserPassword,
 		},
 		"DELETE": {
-			"modules": deleteModules,
-			"users":   deleteUsers,
+			"elements": deleteElements,
+			"users":    deleteUsers,
 		},
 	}
 

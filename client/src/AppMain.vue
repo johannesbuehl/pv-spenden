@@ -1,61 +1,48 @@
-<script lang="ts">
-	const row_roof_map = {
-		d: "Kirchendach",
-		r: "Gemeindehaus",
-		v: "Pfarrhaus"
-	}
-
-	export function get_module_roof(mid: string): string {
-		const mid_row = mid.slice(3, 4);
-
-		for (let [row, roof] of Object.entries(row_roof_map)) {
-			if (mid_row <= row) {
-				return `Modul "${mid.slice(3).toUpperCase()}" (${roof})`;
-			}
-		}
-
-		return mid_row;
-	}
-</script>
-
 <script setup lang="ts">
 	import { ref } from 'vue';
 
-	import BasePV, { type Module } from './components/BasePV.vue';
-	import { reserved_modules } from './Globals';
+	import BasePV, { get_element_roof, get_element_type, type Element } from './components/BasePV.vue';
+	import { reserved_elements } from './Globals';
 import AppLayout from './components/AppLayout/AppLayout.vue';
 
-	const selected_module = ref<Module>();
+	const selected_element = ref<Element>();
 </script>
 
 <template>
 	<AppLayout>
 		<BasePV
-		v-model:selected_module="selected_module"
+			v-model:selected_element="selected_element"
 		>
 			<template #header
-				v-if="selected_module !== undefined"
+				v-if="selected_element !== undefined"
 			>
-				{{ get_module_roof(selected_module?.mid) }}
+				{{ get_element_roof(selected_element?.mid) }}
 			</template>
-			<div
-			v-if="selected_module && reserved_modules[selected_module.mid] !== undefined"
-			id="tooltip-sold"
+			<template
+				v-if="selected_element !== undefined"
 			>
-			Gespendet von<br>
-			{{ selected_module.name }}
-		</div>
-		<div
-			v-else
-			id="tooltip-buy"
-		>
-			Dieses Modul spenden<br>
-			<a href="https://www.evkirchebuehl.de" target="_blank" rel="noopener noreferrer">Dummy-Link</a>
-		</div>
+				<div
+					v-if="reserved_elements[selected_element.mid] !== undefined"
+					id="tooltip-sold"
+				>
+					Gespendet von<br>
+					{{ selected_element.name }}
+				</div>
+				<div
+					v-else
+					id="tooltip-buy"
+				>
+					Dieses {{ get_element_type(selected_element.mid) }} spenden<br>
+					<a href="https://www.evkirchebuehl.de" target="_blank" rel="noopener noreferrer">Dummy-Link</a>
+				</div>
+			</template>
 		</BasePV>
 	</AppLayout>
 </template>
 
 <style scoped>
-	
+	a {
+		text-decoration: underline;
+		font-style: italic;
+	}
 </style>

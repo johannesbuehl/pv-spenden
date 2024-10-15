@@ -1,7 +1,7 @@
 <script lang="ts">
 	enum WindowState {
 		Login,
-		Modules,
+		Elements,
 		Account,
 		Users
 	}
@@ -12,41 +12,40 @@
 	import { faPlus, faSdCard, faTrashCan, faXmark } from '@fortawesome/free-solid-svg-icons';
 	import { ref, watch } from 'vue';
 	
-	import BasePV, { type Module } from './components/BasePV.vue';
+	import BasePV, { get_element_roof, get_element_type, type Element } from './components/BasePV.vue';
 	import { api_call, type APICallResult } from './lib';
-	import { reserved_modules, user, type ReservedModules } from './Globals';
+	import { reserved_elements, user, type ReservedElements } from './Globals';
 	import AdminUsers from './components/AdminUsers.vue';
 	import BaseButton from './components/BaseButton.vue';
 	import AdminLogin from './components/AdminLogin.vue';
 	import AdminAccount from './components/AdminAccount.vue';
 	import AppLayout from './components/AppLayout/AppLayout.vue';
-import { get_module_roof } from './AppMain.vue';
 
 	const window_state = ref<WindowState>(WindowState.Login);
-	const selected_module = ref<Module>();
+	const selected_element = ref<Element>();
 
 	watch(user, user => {
-			window_state.value = user?.logged_in ? WindowState.Modules : WindowState.Login
+			window_state.value = user?.logged_in ? WindowState.Elements : WindowState.Login
 	}, { deep: true })
 
 	async function submit() {
-		// check wether a module is selected
-		if (selected_module.value !== undefined) {
-			let response: APICallResult<ReservedModules>;
+		// check wether a element is selected
+		if (selected_element.value !== undefined) {
+			let response: APICallResult<ReservedElements>;
 			
-			const name = selected_module.value.name !== "" ? selected_module.value.name : "Anonym";
+			const name = selected_element.value.name !== "" ? selected_element.value.name : "Anonym";
 				
-			// if the module is already reserved, patch it instead
-			const method = reserved_modules.value[selected_module.value.mid] === undefined ? "POST" : "PATCH";
+			// if the element is already reserved, patch it instead
+			const method = reserved_elements.value[selected_element.value.mid] === undefined ? "POST" : "PATCH";
 				
-			response = await api_call<{ reserved_modules: ReservedModules }>(method, "modules", { mid: selected_module.value.mid }, {
+			response = await api_call<{ reserved_elements: ReservedElements }>(method, "elements", { mid: selected_element.value.mid }, {
 				name
 			});
 			
 			if (response.ok) {
-				reserved_modules.value = (await response.json()).reserved_modules;
+				reserved_elements.value = (await response.json()).reserved_elements;
 				
-				selected_module.value = undefined;
+				selected_element.value = undefined;
 			} else {
 				alert(`Error during database write: ${await response.text()}`);
 			}
@@ -54,17 +53,17 @@ import { get_module_roof } from './AppMain.vue';
 	}
 
 	async function delete_reservation() {
-		// only proceed if there is a valid module-selection
-		if (selected_module.value !== undefined) {
-			const module_name = selected_module.value?.mid.match(/\w\d+/)?.["0"].toUpperCase()
+		// only proceed if there is a valid element-selection
+		if (selected_element.value !== undefined) {
+			const element_name = selected_element.value?.mid.match(/\w?\d+/)?.["0"].toUpperCase()
 			
-			if (confirm(`Delete reservation for module "${module_name}" with the name "${reserved_modules.value[selected_module.value.mid]}"?`)) {
-				const response = await api_call<{ reserved_modules: ReservedModules }>("DELETE", "modules", { mid: selected_module.value.mid });
+			if (confirm(`Reservierung für ${get_element_type(selected_element.value.mid)} ${element_name} mit dem Namen "${reserved_elements.value[selected_element.value.mid]}" löschen?`)) {
+				const response = await api_call<{ reserved_elements: ReservedElements }>("DELETE", "elements", { mid: selected_element.value.mid });
 				
 				if (response.ok) {
-					reserved_modules.value = (await response.json()).reserved_modules;
+					reserved_elements.value = (await response.json()).reserved_elements;
 
-					selected_module.value.name = undefined;
+					selected_element.value.name = undefined;
 				}
 			}
 		}
@@ -75,37 +74,37 @@ import { get_module_roof } from './AppMain.vue';
 	<AdminLogin v-if="window_state === WindowState.Login" v-model="user" />
 	<AppLayout v-else>
 		<template #header>
-			<a class="navbar-item" :class="{ active: window_state === WindowState.Modules }" @click="window_state = WindowState.Modules">Modules</a>
+			<a class="navbar-item" :class="{ active: window_state === WindowState.Elements }" @click="window_state = WindowState.Elements">Elemente</a>
 			<a class="navbar-item" :class="{ active: window_state === WindowState.Account }" @click="window_state = WindowState.Account">Account</a>
-			<a v-if="user?.name === 'admin'" class="navbar-item" :class="{ active: window_state === WindowState.Users }" @click="window_state = WindowState.Users">Users</a>
+			<a v-if="user?.name === 'admin'" class="navbar-item" :class="{ active: window_state === WindowState.Users }" @click="window_state = WindowState.Users">Benutzer</a>
 		</template>
 		<BasePV
-			v-if="window_state === WindowState.Modules"
-			v-model:selected_module="selected_module"
+			v-if="window_state === WindowState.Elements"
+			v-model:selected_element="selected_element"
 		>
 			<template #header
-				v-if="selected_module !== undefined"
+				v-if="selected_element !== undefined"
 			>
-				{{ get_module_roof(selected_module.mid) }}
+				{{ get_element_roof(selected_element.mid) }}
 			</template>
 			<div
-				v-if="selected_module"
+				v-if="selected_element"
 				id="tooltip_content"
 			>
 				<BaseButton
-					v-if=" selected_module.name === undefined"
-					@click="selected_module.name = ''"
+					v-if=" selected_element.name === undefined"
+					@click="selected_element.name = ''"
 				>
-					<FontAwesomeIcon :icon="faPlus"></FontAwesomeIcon> Reserve Module
+					<FontAwesomeIcon :icon="faPlus"></FontAwesomeIcon> {{ get_element_type(selected_element.mid) }} {{ selected_element.mid.match(/\w?\d+/)?.[0].toUpperCase() }} reservieren
 				</BaseButton>
 				<template v-else>
 					<BaseButton @click="submit">
 						<FontAwesomeIcon :icon="faSdCard" />
 					</BaseButton>
-					<input type="text" id="input-name" v-model="selected_module.name" placeholder="Anonym" @keydown.enter="submit" />
+					<input type="text" id="input-name" v-model="selected_element.name" placeholder="Anonym" @keydown.enter="submit" />
 					<BaseButton
-						v-if="reserved_modules[selected_module.mid] === undefined"
-						@click="selected_module.name = undefined"
+						v-if="reserved_elements[selected_element.mid] === undefined"
+						@click="selected_element.name = undefined"
 					>
 						<FontAwesomeIcon :icon="faXmark" />
 					</BaseButton>
@@ -145,6 +144,8 @@ import { get_module_roof } from './AppMain.vue';
 
 	#input-name {
 		transition: opacity 0.2s;
+
+		width: 100%;
 	}
 
 	#input-name:disabled {

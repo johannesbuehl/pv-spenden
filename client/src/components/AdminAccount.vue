@@ -3,19 +3,19 @@
 		const result: string[] = [];
 
 		if (password_old !== undefined && password_old.length === 0) {
-			result.push("Old password is missing");
+			result.push("Bisheriges Passwort fehlt");
 		}
 
 		if (password_new.length < 12) {
-			result.push("Password must be at least 12 characters long");
+			result.push("Passwort muss mindestens 12 Zeichen lang sein");
 		}
 
 		if (password_new.length > 64) {
-			result.push("Password must be at most 64 characters long");
+			result.push("Passwort darf höchstens 64 Zeichen lang sein");
 		}
 
 		if (password_repeat !== undefined && password_new !== password_repeat) {
-			result.push("Passwords don't match");
+			result.push("Passwörter stimmen nicht überein");
 		}
 
 		return result;
@@ -27,7 +27,8 @@
 	import BaseButton from './BaseButton.vue';
 	import { faSdCard } from '@fortawesome/free-solid-svg-icons';
 	import { ref } from 'vue';
-import { api_call } from '@/lib';
+	
+	import { api_call } from '@/lib';
 
 	const password_current = ref<string>("");
 	const password_new = ref<string>("");
@@ -40,7 +41,7 @@ import { api_call } from '@/lib';
 			});
 
 			if (response.ok) {
-				alert("password changed successfully");
+				alert("Passwort erfolgreich geändert");
 				password_current.value = "";
 				password_new.value = "";
 				password_repeat.value = "";
@@ -55,11 +56,11 @@ import { api_call } from '@/lib';
 		<div id=change-password>
 			<form id="change-password-inputs">
 				<input style="display: none;" type="text" autocomplete="username">
-				current password
+				Bisheriges Passwort
 				<input type="password" autocomplete="current-password" v-model="password_current">
-				new password
+				Neues Passwort
 				<input type="password" autocomplete="new-password" v-model="password_new">
-				repeat new password
+				Neues Passwort wiederholen
 				<input type="password" autocomplete="new-password" v-model="password_repeat">
 			</form>
 			<div
@@ -73,7 +74,7 @@ import { api_call } from '@/lib';
 					{{ e }}
 				</div>
 			</div>
-			<BaseButton id="btn-change-password" :disabled="validate_password(password_new, password_repeat, password_current).length > 0"  @click="change_password"><FontAwesomeIcon :icon="faSdCard" /> Change Password</BaseButton>
+			<BaseButton id="btn-change-password" :disabled="validate_password(password_new, password_repeat, password_current).length > 0"  @click="change_password"><FontAwesomeIcon :icon="faSdCard" /> Passwort ändern</BaseButton>
 		</div>
 	</div>
 </template>
