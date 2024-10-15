@@ -1,17 +1,9 @@
 <script setup lang="ts">
-import { onMounted, onUpdated } from 'vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import BaseButton from './BaseButton.vue';
+import { faXmark } from '@fortawesome/free-solid-svg-icons';
 
-	const emit = defineEmits<{
-		refresh: [];
-	}>();
-
-	onMounted(() => {
-		emit("refresh");
-	});
-
-	onUpdated(() => {
-		emit("refresh");
-	});
+	defineEmits<{close: [] }>();
 </script>
 
 <template>
@@ -19,9 +11,13 @@ import { onMounted, onUpdated } from 'vue';
 		id="tooltip"
 		@click="(e) => { e.stopPropagation()}"
 	>
-		<slot>
-			
-		</slot>	
+		<div id="header">
+			<slot name="header"></slot>
+			<BaseButton id="btn-close" @click="$emit('close')"><FontAwesomeIcon :icon="faXmark" /></BaseButton>
+		</div>
+		<div id="text">
+			<slot></slot>	
+		</div>
 	</div>
 </template>
 
@@ -34,8 +30,29 @@ import { onMounted, onUpdated } from 'vue';
 
 		box-shadow: 0.125em 0.125em 0.25em;
 
-		text-align: center;
+		max-width: fit-content;
 
-		transform: translateY(0.125em);
+		display: flex;
+		flex-direction: column;
+		gap: 0.5em;
+	}
+
+	#header {
+		display: flex;
+
+		gap: 1em;
+
+		font-family: Aleo;
+		font-weight: bold;
+	}
+
+	#btn-close {
+		margin-left: auto;
+	}
+
+	#text {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
 	}
 </style>

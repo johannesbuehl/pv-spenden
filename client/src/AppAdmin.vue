@@ -20,6 +20,7 @@
 	import AdminLogin from './components/AdminLogin.vue';
 	import AdminAccount from './components/AdminAccount.vue';
 	import AppLayout from './components/AppLayout/AppLayout.vue';
+import { get_module_roof } from './AppMain.vue';
 
 	const window_state = ref<WindowState>(WindowState.Login);
 	const selected_module = ref<Module>();
@@ -62,6 +63,8 @@
 				
 				if (response.ok) {
 					reserved_modules.value = (await response.json()).reserved_modules;
+
+					selected_module.value.name = undefined;
 				}
 			}
 		}
@@ -80,6 +83,11 @@
 			v-if="window_state === WindowState.Modules"
 			v-model:selected_module="selected_module"
 		>
+			<template #header
+				v-if="selected_module !== undefined"
+			>
+				{{ get_module_roof(selected_module.mid) }}
+			</template>
 			<div
 				v-if="selected_module"
 				id="tooltip_content"

@@ -8,13 +8,15 @@
 		svg_dom.removeAttribute("width");
 		svg_dom.removeAttribute("height");
 
-		const pv_module_rects: SVGRectElement[] = Array.from(svg_dom.querySelectorAll(".pv-module"));
+		// const pv_module_rects: SVGRectElement[] = Array.from(svg_dom.querySelectorAll(".pv-module"));
+		const pv_module_rects: SVGRectElement[] = Array.from(svg_dom.querySelectorAll("path[id^='pv-']"));
 
-		pv_module_rects.forEach(pv_module_rect => {
-			pv_module_rect.style.removeProperty("fill");
+		pv_module_rects.forEach(pv_module => {
+			pv_module.style.removeProperty("fill");
+			pv_module.classList.add("pv-module")
 
-			if (reserved_modules[pv_module_rect.id] !== undefined) {
-				pv_module_rect.classList.add("sold");
+			if (reserved_modules[pv_module.id] !== undefined) {
+				pv_module.classList.add("sold");
 			}
 		});
 
@@ -25,9 +27,11 @@
 </script>
 
 <script setup lang="ts">
-	import { reserved_modules, type ReservedModules } from '@/Globals';
 	import { onBeforeMount, onMounted, onUnmounted, ref } from 'vue';
-import BaseTooltip from './BaseTooltip.vue';
+	
+	import { reserved_modules, type ReservedModules } from '@/Globals';
+
+	import BaseTooltip from './BaseTooltip.vue';
 
 	const svg = ref<string>();
 
@@ -47,12 +51,19 @@ import BaseTooltip from './BaseTooltip.vue';
 		}
 	});
 
-	function on_click(e: MouseEvent) {
-		const target = e.target as SVGElement;
-		
+	function hide_tooltip() {
 		if (selected_module_rect.value) {
 			selected_module_rect.value.classList.remove("selected");
 		}
+
+		selected_module_rect.value = undefined;
+		selected_module.value = undefined;
+	}
+
+	function on_click(e: MouseEvent) {
+		const target = e.target as SVGElement;
+
+		hide_tooltip();
 
 		if (target.classList.contains("pv-module")) {
 			// only select the element, if it isn't the previous selected element
@@ -68,13 +79,7 @@ import BaseTooltip from './BaseTooltip.vue';
 				};
 				
 				selected_module_rect.value.classList.add("selected");
-			} else {
-				selected_module_rect.value = undefined;
-				selected_module.value = undefined;
 			}
-		} else {
-			selected_module_rect.value = undefined;
-			selected_module.value = undefined;
 		}
 	}
 
@@ -85,20 +90,6 @@ import BaseTooltip from './BaseTooltip.vue';
 	onUnmounted(() => {
 		document.removeEventListener("click", on_click);
 	});
-
-	function on_tooltip_mounted() {
-		if (!!svg_wrapper.value && !!tooltip.value && !!selected_module_rect.value) {
-			const tooltip_width = tooltip.value.getBoundingClientRect().width;
-		
-			const module_position = selected_module_rect.value.getBoundingClientRect();
-			const svg_wrapper_position = svg_wrapper.value.getBoundingClientRect();
-
-			const tooltip_left = Math.max(svg_wrapper_position.left, module_position.left + window.scrollX + module_position.width / 2 - tooltip_width / 2);
-
-			tooltip.value.style.left = `min(${tooltip_left}px, ${svg_wrapper_position.width + svg_wrapper_position.left + scrollX - tooltip_width}px)`;
-			tooltip.value.style.top = (module_position.bottom + window.scrollY).toString() + "px";
-		}
-	}
 </script>
 
 <template>
@@ -109,24 +100,29 @@ import BaseTooltip from './BaseTooltip.vue';
 			ref="svg_wrapper"
 			v-html="prepare_svg(svg, reserved_modules)"
 		></div>
-		<div
-			id="tooltip-wrapper"
-			ref="tooltip"
-		>
-			<Transition>
+		<Transition>
+			<div
+				v-if="selected_module"
+				id="tooltip-wrapper"
+				ref="tooltip"
+			>
 				<BaseTooltip
-					v-if="selected_module"
-					@refresh="on_tooltip_mounted"
+					@close="hide_tooltip"
 				>
+					<template #header>
+						<slot name="header"></slot>
+					</template>
 					<slot></slot>
 				</BaseTooltip>
-			</Transition>
-		</div>
+			</div>
+		</Transition>
 	</div>
 </template>
 
 <style scoped>
 	#wrapper {
+		position: relative;
+
 		align-items: center;
 
 		overflow: auto;
@@ -139,7 +135,14 @@ import BaseTooltip from './BaseTooltip.vue';
 	#tooltip-wrapper {
 		position: absolute;
 
-		width: max-content;
+		inset: 0;
+
+		backdrop-filter: blur(10px);
+
+		display: flex;
+
+		align-items: center;
+		justify-content: center;
 	}
 
 	.v-enter-active,
