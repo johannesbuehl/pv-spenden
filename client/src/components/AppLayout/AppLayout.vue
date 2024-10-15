@@ -28,15 +28,21 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 </script>
 
 <template>
-	<LayoutHeaderFooter v-if="user?.logged_in">
+	<LayoutHeaderFooter v-if="user?.logged_in || !is_home('/')">
 		<a v-if="!is_home('/')" href="/">Home</a>
-		<a v-if="!is_home('/admin.html')" href="/admin.html">Admin</a>
 
-		<slot name="header"></slot>
-		
-		<template #right>
-			<a @click="logout"><FontAwesomeIcon :icon="faPowerOff" /></a>
+		<template
+			v-if="user?.logged_in"
+		>
+			<a v-if="!is_home('/admin.html')" href="/admin.html">Admin</a>
+			
+			<slot name="header"></slot>
 		</template>
+			<template #right
+				v-if="user?.logged_in"
+			>
+				<a @click="logout"><FontAwesomeIcon :icon="faPowerOff" /></a>
+			</template>
 	</LayoutHeaderFooter>
 	<div id="scroll">
 		<div id="app_content">

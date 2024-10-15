@@ -2,13 +2,13 @@
 
 <template>
 	<div class="bar">
-		<div>
+		<div id="left">
 			<slot name="left"></slot>
 		</div>
 		<div>
 			<slot></slot>
 		</div>
-		<div>
+		<div id="right">
 			<slot name="right"></slot>
 		</div>
 	</div>
@@ -16,10 +16,12 @@
 
 <style scoped>
 	.bar {
+		position: relative;
+
 		display: flex;
 
 		align-items: baseline;
-		justify-content: space-between;
+		justify-content: center;
 
 		width: 100%;
 	}
@@ -30,5 +32,15 @@
 		align-items: baseline;
 
 		gap: 2em;
+	}
+
+	#left {
+		position: absolute;
+		left: 0;
+	}
+
+	#right {
+		position: absolute;
+		right: 0;
 	}
 </style>

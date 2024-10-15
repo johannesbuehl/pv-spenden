@@ -71,15 +71,15 @@
 </script>
 
 <template>
-	<AdminLogin v-if="window_state === WindowState.Login" v-model="user" />
-	<AppLayout v-else>
+	<AppLayout>
 		<template #header>
 			<a class="navbar-item" :class="{ active: window_state === WindowState.Elements }" @click="window_state = WindowState.Elements">Elemente</a>
 			<a class="navbar-item" :class="{ active: window_state === WindowState.Account }" @click="window_state = WindowState.Account">Account</a>
 			<a v-if="user?.name === 'admin'" class="navbar-item" :class="{ active: window_state === WindowState.Users }" @click="window_state = WindowState.Users">Benutzer</a>
 		</template>
+		<AdminLogin v-if="window_state === WindowState.Login" v-model="user" />
 		<BasePV
-			v-if="window_state === WindowState.Elements"
+			v-else-if="window_state === WindowState.Elements"
 			v-model:selected_element="selected_element"
 		>
 			<template #header
