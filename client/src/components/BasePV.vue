@@ -22,7 +22,7 @@
 
 		for (let [row, roof] of Object.entries(row_roof_map)) {
 			if (mid_row <= row) {
-				return `${get_element_type(mid)} "${mid.slice(3).toUpperCase()}" (${roof})`;
+				return `${get_element_type(mid)} ${mid.slice(3).toUpperCase()} (${roof})`;
 			}
 		}
 
