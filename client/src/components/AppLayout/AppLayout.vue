@@ -15,8 +15,6 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 	};
 
 	function is_home(pathname: string): boolean {
-		console.debug(window.location.pathname, pathname);
-
 		return window.location.pathname === pathname;
 	}
 
