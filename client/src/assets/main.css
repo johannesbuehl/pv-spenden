@@ -4,7 +4,6 @@
 *::before,
 *::after {
 	box-sizing: border-box;
-	font-family: Ebrima;
 }
 
 input, button {
@@ -12,6 +11,8 @@ input, button {
 }
 
 body {
+	font-family: var(--font-default);
+	
 	margin: 0;
 
 	font-size: 1.5em;
@@ -19,11 +20,6 @@ body {
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-}
-
-body > #app {
-	width: 100vw;
-	height: 100vh;
 }
 
 a {

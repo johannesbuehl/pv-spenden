@@ -16,31 +16,21 @@
 
 <style scoped>
 	.bar {
-		position: relative;
-
 		display: flex;
 
 		align-items: baseline;
-		justify-content: center;
+		justify-content: space-between;
 
 		width: 100%;
 	}
 
-	.bar > * {
+	.bar > div {
 		display: flex;
 
 		align-items: baseline;
 
-		gap: 2em;
-	}
+		font-family: var(--font-header);
 
-	#left {
-		position: absolute;
-		left: 0;
-	}
-
-	#right {
-		position: absolute;
-		right: 0;
+		column-gap: 2em;
 	}
 </style>

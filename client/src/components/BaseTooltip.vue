@@ -25,6 +25,8 @@ import { faXmark } from '@fortawesome/free-solid-svg-icons';
 	#tooltip {
 		background-color: white;
 
+		margin: 1em;
+
 		border-radius: 0.125em;
 		padding: 0.25em;
 
@@ -38,15 +40,26 @@ import { faXmark } from '@fortawesome/free-solid-svg-icons';
 	}
 
 	#header {
+		position: relative;
+
+		font-family: var(--font-header);
+		font-weight: bold;
+
 		display: flex;
 
-		gap: 1em;
+		align-items: flex-start;
 
-		font-family: Aleo;
-		font-weight: bold;
+		gap: 1em;
 	}
 
 	#btn-close {
-		margin-left: auto;
+		aspect-ratio: 1;
+		min-height: 0;
+
+		display: flex;
+
+		align-items: center;
+
+		padding: 0.25em;
 	}
 </style>

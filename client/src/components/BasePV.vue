@@ -70,6 +70,8 @@
 
 		svg_dom.removeAttribute("width");
 		svg_dom.removeAttribute("height");
+		// svg_dom.removeAttribute("viewBox")
+		svg_dom.id = "main-content";
 
 		const prepare_element = (ele: SVGPathElement, classname: string) => {
 			ele.querySelectorAll<SVGSetElement>(".fill").forEach((e) => e.style.removeProperty("fill"));
@@ -130,44 +132,51 @@
 </script>
 
 <template>
-	<div id="wrapper">
+	<div
+		id="wrapper"
+	>
 		<div
 			v-if="!!svg"
 			id="div-svg"
 			ref="svg_wrapper"
 			v-html="prepare_svg(svg, reserved_elements)"
 		></div>
-		<Transition>
-			<div
-				v-if="selected_element"
-				id="tooltip-wrapper"
-				ref="tooltip"
-				@click="hide_tooltip"
-			>
-				<BaseTooltip
-					@close="hide_tooltip"
-				>
-					<template #header>
-						<slot name="header"></slot>
-					</template>
-					<slot></slot>
-				</BaseTooltip>
-			</div>
-		</Transition>
 	</div>
+	<Transition>
+		<div
+			v-if="selected_element"
+			id="tooltip-wrapper"
+			ref="tooltip"
+			@click="hide_tooltip"
+		>
+			<BaseTooltip
+				@close="hide_tooltip"
+			>
+				<template #header>
+					<slot name="header"></slot>
+				</template>
+				<slot></slot>
+			</BaseTooltip>
+		</div>
+	</Transition>
 </template>
 
 <style scoped>
 	#wrapper {
 		position: relative;
 
-		align-items: center;
+		height: 100%;
+		width: 100cqw;
 
-		overflow: auto;
+		display: flex;
+
+		flex-direction: column;
+		justify-content: center;
+		overflow-x: auto;
 	}
 
-	#div-svg {		
-		min-width: 50em;
+	#div-svg {
+		margin-inline: auto;
 	}
 
 	#tooltip-wrapper {
@@ -175,7 +184,7 @@
 
 		inset: 0;
 
-		backdrop-filter: blur(0.5em);
+		backdrop-filter: blur(0.125em);
 
 		display: flex;
 
@@ -196,79 +205,121 @@
 </style>
 
 <style>
-	svg * {
+	svg#main-content {
+		width: 50em;
+		/* max-width: 90cqw; */
+		max-width: 100cqh;
+	}
+
+	/* @media screen and (max-width: 900px) {
+		svg#main-content {
+			max-width: none;
+		}
+	} */
+
+	svg#main-content * {
 		user-select: none;
 	}
 
-	svg .element {
+	svg#main-content .element {
 		cursor: pointer;
-	}
-
-	svg .element .fill,
-	svg .element.fill {
-		fill: hsl(240 100% 50%);
 		
-		transition: filter 0.2s;
+		transition: fill 0.2s;
 	}
 
-	svg .element:hover .fill,
-	svg .element:hover.fill {
-		filter: brightness(75%);
+	/* module */
+	svg#main-content .module .fill,
+	svg#main-content .module.fill {
+		fill: var(--color-module);
 	}
 
-	svg .element.selected .fill,
-	svg .element.selected.fill {
-		fill: hsl(210 100% 50%);
+	svg#main-content .module:hover .fill,
+	svg#main-content .module:hover.fill {
+		fill: var(--color-module-hover);
 	}
 
-	svg .element.sold .fill,
-	svg .element.sold.fill {
-		fill: hsl(240 20% 55%)
+	svg#main-content .module.selected .fill,
+	svg#main-content .module.selected.fill {
+		fill: var(--color-module-selected);
 	}
 
-
-	svg .inverter .fill,
-	svg .inverter.fill {
-		fill: hsl(30 100% 50%);
-		
-		transition: filter 0.2s;
+	/* element - sold */
+	svg#main-content .module.sold .fill,
+	svg#main-content .module.sold.fill {
+		fill: var(--color-module-sold);
 	}
 
-	svg .inverter:hover .fill,
-	svg .inverter:hover.fill {
-		filter: brightness(75%);
+	svg#main-content .module.sold:hover .fill,
+	svg#main-content .module.sold:hover.fill {
+		fill: var(--color-module-sold-hover);
 	}
 
-	svg .inverter.select .fill,
-	svg .inverter.select.fill {
-		fill: hsl(210 100% 50%);
+	svg#main-content .module.sold.selected .fill,
+	svg#main-content .module.sold.selected.fill {
+		fill: var(--color-module-sold-selected);
 	}
 
-	svg .inverter.sold .fill,
-	svg .inverter.sold.fill {
-		fill: hsl(240 20% 55%)
+	/* inverter */
+	svg#main-content .inverter .fill,
+	svg#main-content .inverter.fill {
+		fill: var(--color-inverter);
 	}
 
+	svg#main-content .inverter:hover .fill,
+	svg#main-content .inverter:hover.fill {
+		fill: var(--color-inverter-hover);
+	}
+
+	svg#main-content .inverter.selected .fill,
+	svg#main-content .inverter.selected.fill {
+		fill: var(--color-inverter-selected);
+	}
+
+	/* inverter - sold */
+	svg#main-content .inverter.sold .fill,
+	svg#main-content .inverter.sold.fill {
+		fill: var(--color-inverter-sold);
+	}
+
+	svg#main-content .inverter.sold:hover .fill,
+	svg#main-content .inverter.sold:hover.fill {
+		fill: var(--color-inverter-sold-hover);
+	}
+
+	svg#main-content .inverter.sold.selected .fill,
+	svg#main-content .inverter.sold.selected.fill {
+		fill: var(--color-inverter-sold-selected);
+	}
+
+	/* battery */	
+	svg#main-content .battery .fill,
+	svg#main-content .battery.fill {
+		fill: var(--color-battery);
+	}
+
+	svg#main-content .battery:hover .fill,
+	svg#main-content .battery:hover.fill {
+		fill: var(--color-battery-hover);
+	}
+
+	svg#main-content .battery.selected .fill,
+	svg#main-content .battery.selected.fill {
+		fill: var(--color-battery-selected);
+	}
+
+	/* battery - sold */
+	svg#main-content .battery.sold .fill,
+	svg#main-content .battery.sold.fill {
+		fill: var(--color-battery-sold);
+	}
 	
-	svg .battery .fill,
-	svg .battery.fill {
-		fill: hsl(120, 50%, 50%);
-		
-		transition: filter 0.2s;
+	svg#main-content .battery.sold:hover .fill,
+	svg#main-content .battery.sold:hover.fill {
+		fill: var(--color-battery-sold-hover);
 	}
 
-	svg .battery:hover .fill,
-	svg .battery:hover.fill {
-		filter: brightness(75%);
-	}
-
-	svg .battery.select .fill,
-	svg .battery.select.fill {
-		fill: hsl(210 100% 50%);
-	}
-
-	svg .battery.sold .fill,
-	svg .battery.sold.fill {
-		fill: hsl(240 20% 55%)
+	svg#main-content .battery.sold.selected .fill,
+	svg#main-content .battery.sold.selected.fill {
+		fill: var(--color-battery-soldselected);
 	}
 </style>

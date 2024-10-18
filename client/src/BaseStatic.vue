@@ -14,6 +14,8 @@ import AppLayout from '@/components/AppLayout/AppLayout.vue';
 <style scoped>
 	#wrapper {
 		max-width: 40em;
+		
+		overflow-wrap: anywhere;
 	}
 
 	#wrapper:deep(h1:first-of-type) {

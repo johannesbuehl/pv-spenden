@@ -21,5 +21,4 @@ import BaseStatic from '@/BaseStatic.vue';
 </template>
 
 <style scoped>
-	
 </style>
