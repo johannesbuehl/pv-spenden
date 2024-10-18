@@ -352,7 +352,7 @@ func getElements(c *fiber.Ctx) responseMessage {
 	return response
 }
 
-var midRegex = regexp.MustCompile(`^(?:pv-\w|(?:ws|bs)-)\d{1,2}$`)
+var midRegex = regexp.MustCompile(`^(?:pv-\w|(?:wr|bs)-)\d{1,2}$`)
 
 func postElements(c *fiber.Ctx) responseMessage {
 	response := responseMessage{}
